@@ -21,6 +21,11 @@ This module will allow you to copy data from one table to another using very sim
         console.log(` √√`);
     })
 
+#### To do :
+
+> - Support cross zone coping
+> - Support explicit AWS config for each table source & destination
+
 #### Contributors :
 
 > - Ezzat [@enGMzizo](https://twitter.com/enGMzizo)
