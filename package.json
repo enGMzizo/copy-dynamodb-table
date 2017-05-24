@@ -1,6 +1,6 @@
 {
   "name": "copy-dynamodb-table",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Copy Dynamodb table to another in the same zone , it is slow but 100% safe √√ ",
   "main": "index.js",
   "scripts": {
