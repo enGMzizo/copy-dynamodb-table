@@ -1,8 +1,8 @@
 {
   "name": "copy-dynamodb-table",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Copy Dynamodb table to another in the same zone , it is slow but 100% safe √√ ",
-  "keywords" : [
+  "keywords": [
     "dynamodb",
     "aws-dynamodb"
   ],
