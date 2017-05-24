@@ -4,32 +4,32 @@ Safe Copy Dynamodb Table
 This module will allow you to copy data from one table to another using very simple API
 
 
-#### Installation
+## Installation
 
-    $ npm install safe-copy-dynamodb-table
+    $ npm i copy-dynamodb-table
 
-#### Uage :
+## Uage :
 
+```js
+const copyDynamodbTable = require('./index').copyDynamodbTable;
+copyDynamodbTable({
+  firstTableName : '<source table name>',
+  secondTableName :  '<destination table name>',
+  },
+  function(err,results){
+    if(err) throw err;
+    console.log(` √√`);
+})
+```
+## To do :
 
-    const copyDynamodbTable = require('./index').copyDynamodbTable;
-    copyDynamodbTable({
-      firstTableName : '<source table name>',
-      secondTableName :  '<destination table name>',
-      },
-      function(err,results){
-        if(err) throw err;
-        console.log(` √√`);
-    })
+- Support cross zone coping
+- Support explicit AWS config for each table source & destination
 
-#### To do :
+## Contributors :
 
-> - Support cross zone coping
-> - Support explicit AWS config for each table source & destination
+- Ezzat [@enGMzizo](https://twitter.com/enGMzizo)
 
-#### Contributors :
-
-> - Ezzat [@enGMzizo](https://twitter.com/enGMzizo)
-
-#### License :
+## License :
 
 MIT
