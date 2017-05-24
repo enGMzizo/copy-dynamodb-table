@@ -6,7 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "@enGMzizo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enGMzizo/safe-dynamodb-table-copy"
+  },
+  "engines": {
+    "node": ">= 6"
+  },
+  "author": "Ezzat @enGMzizo",
   "license": "ISC",
   "dependencies": {
     "async": "^2.4.1",
