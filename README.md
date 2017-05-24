@@ -23,7 +23,7 @@ copyDynamodbTable({
 ```
 ## To do :
 
-- Support cross zone coping
+- Support cross zone copying
 - Support explicit AWS config for each table source & destination
 
 ## Contributors :
