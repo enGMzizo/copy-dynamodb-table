@@ -1,7 +1,11 @@
 {
   "name": "copy-dynamodb-table",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Copy Dynamodb table to another in the same zone , it is slow but 100% safe √√ ",
+  "keywords" : [
+    "dynamodb",
+    "aws-dynamodb"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

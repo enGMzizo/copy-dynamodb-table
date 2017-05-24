@@ -11,7 +11,7 @@ This module will allow you to copy data from one table to another using very sim
 ## Uage :
 
 ```js
-const copyDynamodbTable = require('./index').copyDynamodbTable;
+const copyDynamodbTable = require('copy-dynamodb-table').copyDynamodbTable;
 copyDynamodbTable({
   firstTableName : '<source table name>',
   secondTableName :  '<destination table name>',
