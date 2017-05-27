@@ -57,7 +57,7 @@ copy({
   })
 ```
 
-## AWS Config for each table
+## AWS Config for each table ( cross region ) :
 
 ```js
 var copy = require('copy-dynamodb-table').copy
