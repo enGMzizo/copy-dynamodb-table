@@ -1,6 +1,5 @@
 var copy = require('./index').copy
 
-
 var globalAWSConfig = { // AWS Configration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
   accessKeyId: 'AKID',
   secretAccessKey: 'SECRET',
