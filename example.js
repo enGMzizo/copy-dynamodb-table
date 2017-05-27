@@ -22,11 +22,11 @@ copy({
     config: globalAWSConfig,
     source: {
       tableName: 'source_table_name', // required
-      config: sourceAWSConfig // optional leave blank to use globalAWSConfig
+      config: sourceAWSConfig // optional , leave blank to use globalAWSConfig
     },
     destination: {
       tableName: 'destination_table_name', // required
-      config: destinationAWSConfig // optional
+      config: destinationAWSConfig // optional , leave blank to use globalAWSConfig
     },
     log: true // default false
   },
