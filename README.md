@@ -1,7 +1,7 @@
 Safe Copy Dynamodb Table
 ===================
 
-This module will allow you to copy data from one table to another using very simple API, Support cross zone copying and , explicit AWS config for each table ( source & destination )
+This module will allow you to copy data from one table to another using very simple API, Support cross zone copying and AWS config for each table ( source & destination )
 
 ## Installation
 
