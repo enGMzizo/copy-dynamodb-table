@@ -17,5 +17,5 @@ var validate = function (options, field) {
 }
 
 module.exports.config = function (options) {
-  return validate(options, 'source') && validate(options, 'destination')
+  return validate(options, 'source') && validate(options, 'destination') // check both source and destination
 }

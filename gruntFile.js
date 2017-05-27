@@ -2,7 +2,7 @@
 
 module.exports = function (grunt) {
   var files = [
-    './*.js',
+    './*.js'
   ];
   grunt.initConfig({
     jshint: {
@@ -46,6 +46,5 @@ module.exports = function (grunt) {
   });
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jsbeautifier');
-
   grunt.registerTask('default', ['jsbeautifier', 'jshint']);
 };
