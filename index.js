@@ -1,79 +1,115 @@
-const async = require('async')
-const AWS = require('aws-sdk')
+'use strict'
+var AWS = require('aws-sdk')
+var validate = require('./validate')
 
-let counter = 0
-const dynamoClient = new AWS.DynamoDB.DocumentClient()
-let retries = 0
+module.exports.copy = function copy(values, fn) {
 
-module.exports.copyDynamodbTable = function copyDynamodbTable( {firstTableName , secondTableName ,LastEvaluatedKey}, cb){
-  async.waterfall([function(fn){
-    getItems({tableName : firstTableName , LastEvaluatedKey : LastEvaluatedKey },fn)
-  },
-  function(data,fn){
-    putItems(secondTableName,data,fn)
-  }],function(err,data){
-    if(err){
+  try {
+    validate.config(values) // check required fields
+  } catch (err) {
+    if (err) {
+      return fn(err, {
+        count: 0,
+        status: 'FAIL'
+      })
+    }
+  }
+
+  var options = {
+    config: values.config,
+    source: {
+      tableName: values.source.tableName,
+      dynamoClient: values.source.dynamoClient || new AWS.DynamoDB.DocumentClient(values.source.config || values.config),
+    },
+    destination: {
+      tableName: values.destination.tableName,
+      dynamoClient: values.destination.dynamoClient || new AWS.DynamoDB.DocumentClient(values.destination.config || values.config),
+    },
+    key: values.key,
+    counter: values.counter || 0,
+    retries: 0,
+    data: {},
+    log: values.log
+  }
+
+  getItems(options, function (err, data) {
+    options.data = data
+    options.key = data.LastEvaluatedKey
+    putItems(options, function (err) {
+      if (err) {
+        throw err
+      }
+
+      if (options.log) {
+        process.stdout.clearLine()
+        process.stdout.cursorTo(0)
+        process.stdout.write('Finished ' + options.counter + ' items')
+      }
+
+      if (options.key === undefined) {
+        return fn(err, {
+          count: options.counter,
+          status: 'SUCCESS'
+        })
+      }
+      copy(options, fn)
+    })
+  })
+}
+
+function getItems(options, fn) {
+  scan(options, function (err, data) {
+    if (err) {
       throw err
     }
+    fn(err, mapItems(data))
+  })
+}
 
-    process.stdout.clearLine()
-    process.stdout.cursorTo(0)
-    process.stdout.write(`Finished ${counter} items`)
 
-    if(data.LastEvaluatedKey === undefined){
-      return cb(err,'Finished All Items')
+function scan(options, fn) {
+  options.source.dynamoClient.scan({
+    TableName: options.source.tableName,
+    Limit: 25,
+    ExclusiveStartKey: options.key
+  }, fn)
+}
+
+function mapItems(data) {
+  data.Items = data.Items.map(function (item) {
+    return {
+      PutRequest: {
+        Item: item
+      }
     }
-
-    copyDynamodbTable({firstTableName , secondTableName ,LastEvaluatedKey:data.LastEvaluatedKey},cb)
-  })
-}
-
-function getItems(scanItems,fn){
-  scan(scanItems,function(err,data){
-    if(err) throw err
-    fn(err,mapItems(data))
-  })
-}
-
-
-function scan({tableName,LastEvaluatedKey},fn){
-  dynamoClient.scan({
-    TableName: tableName,
-    Limit : 25,
-    ExclusiveStartKey : LastEvaluatedKey
-  },function(err,data){
-    fn(err,data)
-  })
-}
-
-function mapItems(data){
-  data.Items = data.Items.map(function(item){
-    return { PutRequest: {Item: item}}
   })
   return data
 }
 
-function putItems(tableName,data,fn){
-  let batchWrite = {}
-  batchWrite['RequestItems'] = {}
-  batchWrite['RequestItems'][tableName] = data.Items
-  dynamoClient.batchWrite(batchWrite,function(err,{UnprocessedItems}){
-    if(err) console.trace(err)
-    let UnprocessedItemsLength = 0
-    if(UnprocessedItems[tableName] !== undefined){
-      UnprocessedItemsLength = UnprocessedItems[tableName].length;
-      setTimeout(function(){
-        putItems(tableName,{
-          Items : UnprocessedItems[tableName],
-          LastEvaluatedKey : data.LastEvaluatedKey
-        },fn)
-      }, 2 * retries * 100 ) // from aws http://docs.aws.amazon.com/general/latest/gr/api-retries.html
-      retries++
-      counter += (data.Items.length - UnprocessedItemsLength)
-      return ;
+function putItems(options, fn) {
+  var batchWriteItems = {}
+  batchWriteItems.RequestItems = {}
+  batchWriteItems.RequestItems[options.destination.tableName] = options.data.Items
+  options.destination.dynamoClient.batchWrite(batchWriteItems, function (err, data) {
+    if (err) {
+      throw err
     }
-    retries = 0
-    counter += data.Items.length
-    fn(err,data)
+    var unprocessedItems = data.UnprocessedItems[options.destination.tableName]
+    if (unprocessedItems !== undefined) {
+
+      options.retries++
+        options.counter += (options.data.Items.length - unprocessedItems.length)
+
+      options.data = {
+        Items: unprocessedItems
+      }
+      return setTimeout(function () {
+        putItems(options, fn)
+      }, 2 * options.retries * 100) // from aws http://docs.aws.amazon.com/general/latest/gr/api-retries.html
+
+    }
+    options.retries = 0
+    options.counter += options.data.Items.length
+    fn(err, options)
   })
 }

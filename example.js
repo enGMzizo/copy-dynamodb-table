@@ -1,10 +1,39 @@
-const copyDynamodbTable = require('./index').copyDynamodbTable;
+var copy = require('./index').copy
 
-copyDynamodbTable({
-  firstTableName : '',
-  secondTableName :  '',
+
+var globalAWSConfig = { // AWS Configration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
+  accessKeyId: 'AKID',
+  secretAccessKey: 'SECRET',
+  region: 'eu-west-1'
+}
+
+var sourceAWSConfig = {
+  accessKeyId: 'AKID',
+  secretAccessKey: 'SECRET',
+  region: 'eu-west-1'
+}
+
+var destinationAWSConfig = {
+  accessKeyId: 'AKID',
+  secretAccessKey: 'SECRET',
+  region: 'us-west-2' // support cross zone copying
+}
+
+copy({
+    config: globalAWSConfig,
+    source: {
+      tableName: 'source_table_name', // required
+      config: sourceAWSConfig // optional leave blank to use globalAWSConfig
+    },
+    destination: {
+      tableName: 'destination_table_name', // required
+      config: destinationAWSConfig // optional
+    },
+    log: true // default false
   },
-  function(err,results){
-    if(err) throw err;
-    console.log(` √√`);
-})
+  function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    console.log(result)
+  })
