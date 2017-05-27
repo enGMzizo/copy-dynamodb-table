@@ -5,7 +5,8 @@
   "keywords": [
     "dynamodb",
     "aws-dynamodb",
-    "AWS"
+    "AWS",
+    "copy-tables"
   ],
   "main": "index.js",
   "scripts": {
