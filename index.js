@@ -5,7 +5,7 @@ var validate = require('./validate')
 module.exports.copy = function copy(values, fn) {
 
   try {
-    validate.config(values) // check required fields
+    validate.config(values)
   } catch (err) {
     if (err) {
       return fn(err, {
