@@ -33,7 +33,7 @@ copy({
 ```js
 var copy = require('copy-dynamodb-table').copy
 
-var globalAWSConfig = { // AWS Configration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
+var globalAWSConfig = { // AWS Configuration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
   accessKeyId: 'AKID',
   secretAccessKey: 'SECRET',
   region: 'eu-west-1'
@@ -62,7 +62,7 @@ copy({
 ```js
 var copy = require('copy-dynamodb-table').copy
 
-var globalAWSConfig = { // AWS Configration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
+var globalAWSConfig = { // AWS Configuration object http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
   accessKeyId: 'AKID',
   secretAccessKey: 'SECRET',
   region: 'eu-west-1'
