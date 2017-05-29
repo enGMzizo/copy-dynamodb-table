@@ -109,6 +109,8 @@ copy({
 ## Use Case :
   With source table read capacity units = 100 & destination table write capacity units  = 1000 , I managed to copy ~100,000 items from source to destination within ~175 seconds , with avarage item size of 4 KB.
 
+## Usage :
+  - Create table if not exist with the same source table schema
 ## Contributors :
 
 - Ezzat [@enGMzizo](https://twitter.com/enGMzizo)

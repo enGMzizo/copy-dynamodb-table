@@ -31,7 +31,7 @@ module.exports.copy = function copy(values, fn) {
     data: {},
     log: values.log
   }
-
+  // to do check if the dest table exist ?
   getItems(options, function (err, data) {
     options.data = data
     options.key = data.LastEvaluatedKey
