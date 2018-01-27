@@ -21,11 +21,13 @@ function copy(values, fn) {
       tableName: values.source.tableName,
       dynamoClient: values.source.dynamoClient || new AWS.DynamoDB.DocumentClient(values.source.config || values.config),
       dynamodb: values.source.dynamodb || new AWS.DynamoDB(values.source.config || values.config),
+      active: values.source.active
     },
     destination: {
       tableName: values.destination.tableName,
       dynamoClient: values.destination.dynamoClient || new AWS.DynamoDB.DocumentClient(values.destination.config || values.config),
       dynamodb: values.source.dynamodb || new AWS.DynamoDB(values.destination.config || values.config),
+      active:values.destination.active,
       createTableStr : 'Creating Destination Table '
     },
     key: values.key,
@@ -36,11 +38,16 @@ function copy(values, fn) {
     create : values.create
   }
 
+  if(options.source.active && options.destination.active){ // both tables are active
+    return startCopying(options,fn)
+  }
+
   if(options.create){ // create table if not exist
     return options.source.dynamodb.describeTable({TableName : options.source.tableName},function(err,data){
       if(err){
         return fn(err,data)
       }
+      options.source.active = true
       data.Table.TableName = options.destination.tableName
       options.destination.dynamodb.createTable(clearTableSchema(data.Table),function(err){
         if(err && err.code !== 'ResourceInUseException'){
@@ -109,6 +116,7 @@ function checkTables(options,fn){
     if(sourceData.Table.TableStatus !== 'ACTIVE'){
       return fn(new Error('Source table not active'),null)
     }
+    options.source.active = true
     options.destination.dynamodb.describeTable({TableName : options.destination.tableName},function(err,destData){
       if(err){
         return fn(err,destData)
@@ -116,6 +124,7 @@ function checkTables(options,fn){
       if(destData.Table.TableStatus !== 'ACTIVE'){
         return fn(new Error('Destination table not active'),null)
       }
+      options.destination.active = true
       fn(null)
     })
   })
@@ -137,6 +146,7 @@ function waitForActive(options,fn){
         return waitForActive(options,fn)
       }
       options.create = false
+      options.destination.active = true
       startCopying(options,fn)
     })
   },1000) // check every second

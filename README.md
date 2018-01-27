@@ -14,7 +14,7 @@ This module will allow you to copy data from one table to another using very sim
 ## Usage :
 
 ```js
-const copy = require('copy-dynamodb-table').copy
+var copy = require('copy-dynamodb-table').copy
 
 copy({
     source: {
