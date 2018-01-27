@@ -1,7 +1,7 @@
 Safe Copy Dynamodb Table
 ===================
 
-This module will allow you to copy data from one table to another using very simple API, Support cross zone copying and AWS config for each table ( source & destination )
+This module will allow you to copy data from one table to another using very simple API, Support cross zone copying and AWS config for each table ( source & destination ) and it can create the destination table using source table schema
 
 [![Dependencies](https://david-dm.org/enGMzizo/copy-dynamodb-table.png)](https://david-dm.org/enGMzizo/copy-dynamodb-table) [![NPM version](https://badge.fury.io/js/copy-dynamodb-table.png)](http://badge.fury.io/js/copy-dynamodb-table)
 
@@ -23,7 +23,8 @@ copy({
     destination: {
       tableName: 'destination_table_name', // required
     },
-    log: true // default false
+    log: true, // default false
+    create : true // create destination table if not exist
   },
   function (err, result) {
     if (err) {
@@ -51,7 +52,8 @@ copy({
     destination: {
       tableName: 'destination_table_name', // required
     },
-    log: true // default false
+    log: true, // default false
+    create : true // create destination table if not exist
   },
   function (err, result) {
     if (err) {
@@ -94,7 +96,8 @@ copy({
       tableName: 'destination_table_name', // required
       config: destinationAWSConfig // optional , leave blank to use globalAWSConfig
     },
-    log: true // default false
+    log: true,// default false
+    create : true // create destination table if not exist
   },
   function (err, result) {
     if (err) {
@@ -113,8 +116,6 @@ copy({
 ## Use Case :
   With source table read capacity units = 100 & destination table write capacity units  = 1000 , I managed to copy ~100,000 items from source to destination within ~175 seconds , with avarage item size of 4 KB.
 
-## Usage :
-  - Create table if not exist with the same source table schema
 ## Contributors :
 
 - Ezzat [@enGMzizo](https://twitter.com/enGMzizo)

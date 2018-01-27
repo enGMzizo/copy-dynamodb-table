@@ -2,7 +2,7 @@
 var AWS = require('aws-sdk')
 var validate = require('./validate')
 
-module.exports.copy = function copy(values, fn) {
+function copy(values, fn) {
 
   try {
     validate.config(values)
@@ -20,30 +20,141 @@ module.exports.copy = function copy(values, fn) {
     source: {
       tableName: values.source.tableName,
       dynamoClient: values.source.dynamoClient || new AWS.DynamoDB.DocumentClient(values.source.config || values.config),
+      dynamodb: values.source.dynamodb || new AWS.DynamoDB(values.source.config || values.config),
     },
     destination: {
       tableName: values.destination.tableName,
       dynamoClient: values.destination.dynamoClient || new AWS.DynamoDB.DocumentClient(values.destination.config || values.config),
+      dynamodb: values.source.dynamodb || new AWS.DynamoDB(values.destination.config || values.config),
+      createTableStr : 'Creating Destination Table '
     },
     key: values.key,
     counter: values.counter || 0,
     retries: 0,
     data: {},
-    log: values.log
+    log: values.log,
+    create : values.create
   }
-  // to do check if the dest table exist ?
+
+  if(options.create){ // create table if not exist
+    return options.source.dynamodb.describeTable({TableName : options.source.tableName},function(err,data){
+      if(err){
+        return fn(err,data)
+      }
+      data.Table.TableName = options.destination.tableName
+      options.destination.dynamodb.createTable(clearTableSchema(data.Table),function(err){
+        if(err && err.code !== 'ResourceInUseException'){
+          return fn(err,data)
+        }
+        waitForActive(options,fn)
+        // wait for TableStatus to be ACTIVE
+      })
+    })
+  }
+
+  checkTables(options,function(err,data){ // check if source and destination table exist
+    if(err){
+      return fn(err,data)
+    }
+    startCopying(options,fn)
+  })
+
+}
+
+function clearTableSchema(table){
+
+  delete table.TableStatus
+  delete table.CreationDateTime
+  delete table.ProvisionedThroughput.LastIncreaseDateTime
+  delete table.ProvisionedThroughput.LastDecreaseDateTime
+  delete table.ProvisionedThroughput.NumberOfDecreasesToday
+  delete table.TableSizeBytes
+  delete table.ItemCount
+  delete table.TableArn
+  delete table.TableId
+
+  if(table.LocalSecondaryIndexes && table.LocalSecondaryIndexes.length > 0){
+    for(var i = 0 ; i < table.LocalSecondaryIndexes.length ; i++){
+        delete table.LocalSecondaryIndexes[i].IndexStatus
+        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.LastIncreaseDateTime
+        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.LastDecreaseDateTime
+        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.NumberOfDecreasesToday
+        delete table.LocalSecondaryIndexes[i].IndexSizeBytes
+        delete table.LocalSecondaryIndexes[i].ItemCount
+        delete table.LocalSecondaryIndexes[i].IndexArn
+    }
+  }
+
+
+  if(table.GlobalSecondaryIndexes && table.GlobalSecondaryIndexes.length > 0){
+    for(var j = 0 ; j < table.GlobalSecondaryIndexes.length ; j++){
+        delete table.GlobalSecondaryIndexes[j].IndexStatus
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastIncreaseDateTime
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastDecreaseDateTime
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.NumberOfDecreasesToday
+        delete table.GlobalSecondaryIndexes[j].IndexSizeBytes
+        delete table.GlobalSecondaryIndexes[j].ItemCount
+        delete table.GlobalSecondaryIndexes[j].IndexArn
+    }
+  }
+
+  return table
+}
+
+function checkTables(options,fn){
+  options.source.dynamodb.describeTable({TableName : options.source.tableName},function(err,sourceData){
+    if(err){
+      return fn(err,sourceData)
+    }
+    if(sourceData.Table.TableStatus !== 'ACTIVE'){
+      return fn(new Error('Source table not active'),null)
+    }
+    options.destination.dynamodb.describeTable({TableName : options.destination.tableName},function(err,destData){
+      if(err){
+        return fn(err,destData)
+      }
+      if(destData.Table.TableStatus !== 'ACTIVE'){
+        return fn(new Error('Destination table not active'),null)
+      }
+      fn(null)
+    })
+  })
+}
+
+function waitForActive(options,fn){
+  setTimeout(function(){
+    options.destination.dynamodb.describeTable({TableName : options.destination.tableName},function(err,data){
+      if(err){
+        return fn(err,data)
+      }
+      if (options.log) {
+        options.destination.createTableStr += '.'
+        process.stdout.clearLine()
+        process.stdout.cursorTo(0)
+        process.stdout.write(options.destination.createTableStr)
+      }
+      if(data.Table.TableStatus !== 'ACTIVE'){ // wait for active
+        return waitForActive(options,fn)
+      }
+      options.create = false
+      startCopying(options,fn)
+    })
+  },1000) // check every second
+}
+
+function startCopying(options,fn){
   getItems(options, function (err, data) {
     options.data = data
     options.key = data.LastEvaluatedKey
     putItems(options, function (err) {
       if (err) {
-        throw err
+        return fn(err)
       }
 
       if (options.log) {
         process.stdout.clearLine()
         process.stdout.cursorTo(0)
-        process.stdout.write('Finished ' + options.counter + ' items')
+        process.stdout.write('Copied ' + options.counter + ' items')
       }
 
       if (options.key === undefined) {
@@ -60,7 +171,7 @@ module.exports.copy = function copy(values, fn) {
 function getItems(options, fn) {
   scan(options, function (err, data) {
     if (err) {
-      throw err
+      return fn(err,data)
     }
     fn(err, mapItems(data))
   })
@@ -92,7 +203,7 @@ function putItems(options, fn) {
   batchWriteItems.RequestItems[options.destination.tableName] = options.data.Items
   options.destination.dynamoClient.batchWrite(batchWriteItems, function (err, data) {
     if (err) {
-      throw err
+      return fn(err,data)
     }
     var unprocessedItems = data.UnprocessedItems[options.destination.tableName]
     if (unprocessedItems !== undefined) {
@@ -113,3 +224,5 @@ function putItems(options, fn) {
     fn(err, options)
   })
 }
+
+module.exports.copy = copy

@@ -28,7 +28,8 @@ copy({
       tableName: 'destination_table_name', // required
       config: destinationAWSConfig // optional , leave blank to use globalAWSConfig
     },
-    log: true // default false
+    log: true, // default false
+    create : false , // create table if not exist
   },
   function (err, result) {
     if (err) {
