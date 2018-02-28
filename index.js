@@ -79,6 +79,8 @@ function clearTableSchema(table){
   delete table.ItemCount
   delete table.TableArn
   delete table.TableId
+  delete table.LatestStreamLabel
+  delete table.LatestStreamArn
 
   if(table.LocalSecondaryIndexes && table.LocalSecondaryIndexes.length > 0){
     for(var i = 0 ; i < table.LocalSecondaryIndexes.length ; i++){
@@ -89,6 +91,8 @@ function clearTableSchema(table){
         delete table.LocalSecondaryIndexes[i].IndexSizeBytes
         delete table.LocalSecondaryIndexes[i].ItemCount
         delete table.LocalSecondaryIndexes[i].IndexArn
+        delete table.LocalSecondaryIndexes[i].LatestStreamLabel
+        delete table.LocalSecondaryIndexes[i].LatestStreamArn
     }
   }
 
@@ -102,6 +106,8 @@ function clearTableSchema(table){
         delete table.GlobalSecondaryIndexes[j].IndexSizeBytes
         delete table.GlobalSecondaryIndexes[j].ItemCount
         delete table.GlobalSecondaryIndexes[j].IndexArn
+        delete table.GlobalSecondaryIndexes[j].LatestStreamLabel
+        delete table.GlobalSecondaryIndexes[j].LatestStreamArn
     }
   }
 
