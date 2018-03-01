@@ -214,6 +214,9 @@ function mapItems(data) {
 }
 
 function putItems(options, fn) {
+  if (!options.data.Items || options.data.Items.length === 0) {
+    return fn(null, options)
+  }
   var batchWriteItems = {}
   batchWriteItems.RequestItems = {}
   batchWriteItems.RequestItems[options.destination.tableName] = options.data.Items
