@@ -160,6 +160,9 @@ function waitForActive(options,fn){
 
 function startCopying(options,fn){
   getItems(options, function (err, data) {
+    if (err) {
+      return fn(err)
+    }
     options.data = data
     options.key = data.LastEvaluatedKey
     putItems(options, function (err) {
