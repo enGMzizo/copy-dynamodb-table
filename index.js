@@ -111,6 +111,13 @@ function clearTableSchema(table){
     }
   }
 
+  if (table.SSEDescription) {
+    table.SSESpecification = {
+      Enabled: (table.SSEDescription.Status === 'ENABLED' || table.SSEDescription.Status === 'ENABLING')
+    }
+    delete table.SSEDescription
+  }
+
   return table
 }
 
