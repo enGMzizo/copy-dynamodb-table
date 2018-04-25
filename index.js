@@ -1,6 +1,7 @@
 'use strict'
 var AWS = require('aws-sdk')
 var validate = require('./validate')
+var readline = require('readline')
 
 function copy(values, fn) {
 
@@ -151,8 +152,8 @@ function waitForActive(options,fn){
       }
       if (options.log) {
         options.destination.createTableStr += '.'
-        process.stdout.clearLine()
-        process.stdout.cursorTo(0)
+        readline.clearLine(process.stdout)
+        readline.cursorTo(process.stdout, 0)
         process.stdout.write(options.destination.createTableStr)
       }
       if(data.Table.TableStatus !== 'ACTIVE'){ // wait for active
@@ -178,8 +179,8 @@ function startCopying(options,fn){
       }
 
       if (options.log) {
-        process.stdout.clearLine()
-        process.stdout.cursorTo(0)
+        readline.clearLine(process.stdout)
+        readline.cursorTo(process.stdout, 0)
         process.stdout.write('Copied ' + options.counter + ' items')
       }
 
