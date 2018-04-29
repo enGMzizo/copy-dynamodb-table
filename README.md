@@ -111,7 +111,7 @@ copy({
 
   - If `source.config` or `destination.config` value is `undefined` , the module will use the `globalAWSConfig`.
   - If `globalAWSConfig` value is `undefined` the module will extact `AWS` config from environment variables.
-  - Increase Write capacity for your dynamodb table temporarily until the copying is finished so you can get the heights copying speed
+  - Increase Write capacity for your dynamodb table temporarily until the copying is finished so you can get the highest copying speed
 
 ## Use Case :
   With source table read capacity units = 100 & destination table write capacity units  = 1000 , I managed to copy ~100,000 items from source to destination within ~175 seconds , with avarage item size of 4 KB.
