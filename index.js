@@ -27,7 +27,7 @@ function copy(values, fn) {
     destination: {
       tableName: values.destination.tableName,
       dynamoClient: values.destination.dynamoClient || new AWS.DynamoDB.DocumentClient(values.destination.config || values.config),
-      dynamodb: values.source.dynamodb || new AWS.DynamoDB(values.destination.config || values.config),
+      dynamodb: values.destination.dynamodb || new AWS.DynamoDB(values.destination.config || values.config),
       active:values.destination.active,
       createTableStr : 'Creating Destination Table '
     },
