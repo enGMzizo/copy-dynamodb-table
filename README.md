@@ -118,7 +118,11 @@ copy({
 
 ## Contributors :
 
-- Ezzat [@enGMzizo](https://twitter.com/enGMzizo)
+- [@enGMzizo](https://twitter.com/enGMzizo)
+- [jazarja](https://github.com/jazarja)
+- [kevpmoore](https://github.com/kevpmoore)
+- [Floby](https://github.com/Floby)
+- [jermeo](https://github.com/jermeo)
 
 ## License :
 
