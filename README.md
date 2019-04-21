@@ -5,7 +5,6 @@ This module will allow you to copy data from one table to another using very sim
 
 [![Dependencies](https://david-dm.org/enGMzizo/copy-dynamodb-table.png)](https://david-dm.org/enGMzizo/copy-dynamodb-table) [![NPM version](https://badge.fury.io/js/copy-dynamodb-table.png)](http://badge.fury.io/js/copy-dynamodb-table)
 
-[![NPM](https://nodei.co/npm/copy-dynamodb-table.png)](http://nodei.co/npm/copy-dynamodb-table)
 
 ## Installation
 
