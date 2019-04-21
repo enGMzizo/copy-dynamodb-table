@@ -82,6 +82,7 @@ function clearTableSchema(table){
   delete table.TableId
   delete table.LatestStreamLabel
   delete table.LatestStreamArn
+  delete table.BillingModeSummary
 
   if(table.LocalSecondaryIndexes && table.LocalSecondaryIndexes.length > 0){
     for(var i = 0 ; i < table.LocalSecondaryIndexes.length ; i++){
