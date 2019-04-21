@@ -123,6 +123,7 @@ copy({
 - [kevpmoore](https://github.com/kevpmoore)
 - [Floby](https://github.com/Floby)
 - [jermeo](https://github.com/jermeo)
+- [Simon Li](https://github.com/siutsin)
 
 ## License :
 
