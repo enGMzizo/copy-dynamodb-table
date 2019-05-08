@@ -3,7 +3,7 @@ var ConfigError = require('./error')
 var regex = new RegExp('^[a-zA-Z0-9_.-]{3,255}$');
 
 var validate = function (options, field) {
-  if (!regex.test(options['field'] || '')) {
+  if (!regex.test(options[field].tableName || '')) {
     throw new ConfigError('InvalidConfig', field + 
     '.tableName must follow AWS naming rules (3-255 length, and only the following characters: a-z, A-Z, 0-9, _-.)')
   }
