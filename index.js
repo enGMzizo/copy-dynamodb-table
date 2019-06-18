@@ -36,7 +36,8 @@ function copy(values, fn) {
     retries: 0,
     data: {},
     log: values.log,
-    create : values.create
+    create : values.create,
+    filter: values.filter || {}
   }
 
   if(options.source.active && options.destination.active){ // both tables are active
@@ -207,11 +208,23 @@ function getItems(options, fn) {
 
 
 function scan(options, fn) {
-  options.source.dynamoClient.scan({
+  let scanParams = {
     TableName: options.source.tableName,
     Limit: 25,
-    ExclusiveStartKey: options.key
-  }, fn)
+    ExclusiveStartKey: options.key,
+  }
+  if (options.filter) {
+    Object.assign(scanParams, {
+      ExpressionAttributeNames: Object.keys(options.filter).reduce((acc, key, index) => Object.assign(acc, {
+        [`#name${index}`]: key
+      }), {}),
+      ExpressionAttributeValues: Object.values(options.filter).reduce((acc, key, index) => Object.assign(acc, {
+        [`:value${index}`]: key
+      }), {}),
+      FilterExpression: [...Array(Object.keys(options.filter).length).keys()].map(x => `#name${x} = :value${x}`).join(' and ')
+    })
+  }
+  options.source.dynamoClient.scan(scanParams, fn)
 }
 
 function mapItems(data) {
