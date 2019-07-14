@@ -37,7 +37,7 @@ function copy(values, fn) {
     data: {},
     log: values.log,
     create : values.create,
-    filter: values.filter || {}
+    filter: values.filter || false
   }
 
   if(options.source.active && options.destination.active){ // both tables are active
