@@ -2,6 +2,7 @@
 var AWS = require('aws-sdk')
 var validate = require('./validate')
 var readline = require('readline')
+var parallel = require('async').parallel;
 
 function copy(values, fn) {
 
@@ -28,116 +29,129 @@ function copy(values, fn) {
       tableName: values.destination.tableName,
       dynamoClient: values.destination.dynamoClient || new AWS.DynamoDB.DocumentClient(values.destination.config || values.config),
       dynamodb: values.destination.dynamodb || new AWS.DynamoDB(values.destination.config || values.config),
-      active:values.destination.active,
-      createTableStr : 'Creating Destination Table '
+      active: values.destination.active,
+      createTableStr: 'Creating Destination Table '
     },
     key: values.key,
     counter: values.counter || 0,
     retries: 0,
     data: {},
     log: values.log,
-    create : values.create
+    create: values.create
   }
 
-  if(options.source.active && options.destination.active){ // both tables are active
-    return startCopying(options,fn)
+  if (options.source.active && options.destination.active) { // both tables are active
+    return startCopying(options, fn)
   }
 
-  if(options.create){ // create table if not exist
-    return options.source.dynamodb.describeTable({TableName : options.source.tableName},function(err,data){
-      if(err){
-        return fn(err,data)
+  if (options.create) { // create table if not exist
+    return options.source.dynamodb.describeTable({ TableName: options.source.tableName }, function (err, data) {
+      if (err) {
+        return fn(err, data)
       }
       options.source.active = true
       data.Table.TableName = options.destination.tableName
-      options.destination.dynamodb.createTable(clearTableSchema(data.Table),function(err){
-        if(err && err.code !== 'ResourceInUseException'){
-          return fn(err,data)
+      options.destination.dynamodb.createTable(clearTableSchema(data.Table), function (err) {
+        if (err && err.code !== 'ResourceInUseException') {
+          return fn(err, data)
         }
-        waitForActive(options,fn)
+        waitForActive(options, fn)
         // wait for TableStatus to be ACTIVE
       })
     })
   }
 
-  checkTables(options,function(err,data){ // check if source and destination table exist
-    if(err){
-      return fn(err,data)
+  checkTables(options, function (err, data) { // check if source and destination table exist
+    if (err) {
+      return fn(err, data)
     }
-    startCopying(options,fn)
+    startCopying(options, fn)
   })
 
 }
 
-function clearTableSchema(table){
+function clearTableSchema(table) {
 
-  delete table.TableStatus
-  delete table.CreationDateTime
-  delete table.ProvisionedThroughput.LastIncreaseDateTime
-  delete table.ProvisionedThroughput.LastDecreaseDateTime
-  delete table.ProvisionedThroughput.NumberOfDecreasesToday
-  delete table.TableSizeBytes
-  delete table.ItemCount
-  delete table.TableArn
-  delete table.TableId
-  delete table.LatestStreamLabel
-  delete table.LatestStreamArn
-  delete table.BillingModeSummary
+  delete table.TableStatus;
+  delete table.CreationDateTime;
+  if (table.ProvisionedThroughput.ReadCapacityUnits === 0 && table.ProvisionedThroughput.WriteCapacityUnits === 0) {
+    delete table.ProvisionedThroughput
+  }
+  else {
+    delete table.ProvisionedThroughput.LastIncreaseDateTime;
+    delete table.ProvisionedThroughput.LastDecreaseDateTime;
+    delete table.ProvisionedThroughput.NumberOfDecreasesToday;
+  }
 
-  if(table.LocalSecondaryIndexes && table.LocalSecondaryIndexes.length > 0){
-    for(var i = 0 ; i < table.LocalSecondaryIndexes.length ; i++){
-        delete table.LocalSecondaryIndexes[i].IndexStatus
-        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.LastIncreaseDateTime
-        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.LastDecreaseDateTime
-        delete table.LocalSecondaryIndexes[i].ProvisionedThroughput.NumberOfDecreasesToday
-        delete table.LocalSecondaryIndexes[i].IndexSizeBytes
-        delete table.LocalSecondaryIndexes[i].ItemCount
-        delete table.LocalSecondaryIndexes[i].IndexArn
-        delete table.LocalSecondaryIndexes[i].LatestStreamLabel
-        delete table.LocalSecondaryIndexes[i].LatestStreamArn
+  delete table.TableSizeBytes;
+  delete table.ItemCount;
+  delete table.TableArn;
+  delete table.TableId;
+  delete table.LatestStreamLabel;
+  delete table.LatestStreamArn;
+
+  if (table.LocalSecondaryIndexes && table.LocalSecondaryIndexes.length > 0) {
+    for (var i = 0; i < table.LocalSecondaryIndexes.length; i++) {
+      delete table.LocalSecondaryIndexes[i].IndexStatus;
+      delete table.LocalSecondaryIndexes[i].IndexSizeBytes;
+      delete table.LocalSecondaryIndexes[i].ItemCount;
+      delete table.LocalSecondaryIndexes[i].IndexArn;
+      delete table.LocalSecondaryIndexes[i].LatestStreamLabel;
+      delete table.LocalSecondaryIndexes[i].LatestStreamArn;
     }
   }
 
 
-  if(table.GlobalSecondaryIndexes && table.GlobalSecondaryIndexes.length > 0){
-    for(var j = 0 ; j < table.GlobalSecondaryIndexes.length ; j++){
-        delete table.GlobalSecondaryIndexes[j].IndexStatus
-        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastIncreaseDateTime
-        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastDecreaseDateTime
-        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.NumberOfDecreasesToday
-        delete table.GlobalSecondaryIndexes[j].IndexSizeBytes
-        delete table.GlobalSecondaryIndexes[j].ItemCount
-        delete table.GlobalSecondaryIndexes[j].IndexArn
-        delete table.GlobalSecondaryIndexes[j].LatestStreamLabel
-        delete table.GlobalSecondaryIndexes[j].LatestStreamArn
+  if (table.GlobalSecondaryIndexes && table.GlobalSecondaryIndexes.length > 0) {
+    for (var j = 0; j < table.GlobalSecondaryIndexes.length; j++) {
+      delete table.GlobalSecondaryIndexes[j].IndexStatus;
+      if (table.GlobalSecondaryIndexes[j].ProvisionedThroughput.ReadCapacityUnits === 0 && table.GlobalSecondaryIndexes[j].ProvisionedThroughput.WriteCapacityUnits === 0) {
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput
+      }
+      else {
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastIncreaseDateTime;
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.LastDecreaseDateTime;
+        delete table.GlobalSecondaryIndexes[j].ProvisionedThroughput.NumberOfDecreasesToday;
+      }
+      delete table.GlobalSecondaryIndexes[j].IndexSizeBytes;
+      delete table.GlobalSecondaryIndexes[j].ItemCount;
+      delete table.GlobalSecondaryIndexes[j].IndexArn;
+      delete table.GlobalSecondaryIndexes[j].LatestStreamLabel;
+      delete table.GlobalSecondaryIndexes[j].LatestStreamArn;
     }
   }
 
   if (table.SSEDescription) {
     table.SSESpecification = {
-      Enabled: (table.SSEDescription.Status === 'ENABLED' || table.SSEDescription.Status === 'ENABLING')
-    }
-    delete table.SSEDescription
+      Enabled: (table.SSEDescription.Status === 'ENABLED' || table.SSEDescription.Status === 'ENABLING'),
+    };
+    delete table.SSEDescription;
   }
 
-  return table
+  if (table.BillingModeSummary) {
+    table.BillingMode = table.BillingModeSummary.BillingMode
+  }
+  delete table.BillingModeSummary;
+
+  return table;
 }
 
-function checkTables(options,fn){
-  options.source.dynamodb.describeTable({TableName : options.source.tableName},function(err,sourceData){
-    if(err){
-      return fn(err,sourceData)
+
+function checkTables(options, fn) {
+  options.source.dynamodb.describeTable({ TableName: options.source.tableName }, function (err, sourceData) {
+    if (err) {
+      return fn(err, sourceData)
     }
-    if(sourceData.Table.TableStatus !== 'ACTIVE'){
-      return fn(new Error('Source table not active'),null)
+    if (sourceData.Table.TableStatus !== 'ACTIVE') {
+      return fn(new Error('Source table not active'), null)
     }
     options.source.active = true
-    options.destination.dynamodb.describeTable({TableName : options.destination.tableName},function(err,destData){
-      if(err){
-        return fn(err,destData)
+    options.destination.dynamodb.describeTable({ TableName: options.destination.tableName }, function (err, destData) {
+      if (err) {
+        return fn(err, destData)
       }
-      if(destData.Table.TableStatus !== 'ACTIVE'){
-        return fn(new Error('Destination table not active'),null)
+      if (destData.Table.TableStatus !== 'ACTIVE') {
+        return fn(new Error('Destination table not active'), null)
       }
       options.destination.active = true
       fn(null)
@@ -145,11 +159,11 @@ function checkTables(options,fn){
   })
 }
 
-function waitForActive(options,fn){
-  setTimeout(function(){
-    options.destination.dynamodb.describeTable({TableName : options.destination.tableName},function(err,data){
-      if(err){
-        return fn(err,data)
+function waitForActive(options, fn) {
+  setTimeout(function () {
+    options.destination.dynamodb.describeTable({ TableName: options.destination.tableName }, function (err, data) {
+      if (err) {
+        return fn(err, data)
       }
       if (options.log) {
         options.destination.createTableStr += '.'
@@ -157,17 +171,18 @@ function waitForActive(options,fn){
         readline.cursorTo(process.stdout, 0)
         process.stdout.write(options.destination.createTableStr)
       }
-      if(data.Table.TableStatus !== 'ACTIVE'){ // wait for active
-        return waitForActive(options,fn)
+      if (data.Table.TableStatus !== 'ACTIVE') { // wait for active
+        return waitForActive(options, fn)
       }
       options.create = false
       options.destination.active = true
-      startCopying(options,fn)
+      startCopying(options, fn);
+
     })
-  },1000) // check every second
+  }, 1000) // check every second
 }
 
-function startCopying(options,fn){
+function startCopying(options, fn) {
   getItems(options, function (err, data) {
     if (err) {
       return fn(err)
@@ -199,7 +214,7 @@ function startCopying(options,fn){
 function getItems(options, fn) {
   scan(options, function (err, data) {
     if (err) {
-      return fn(err,data)
+      return fn(err, data)
     }
     fn(err, mapItems(data))
   })
@@ -234,13 +249,13 @@ function putItems(options, fn) {
   batchWriteItems.RequestItems[options.destination.tableName] = options.data.Items
   options.destination.dynamoClient.batchWrite(batchWriteItems, function (err, data) {
     if (err) {
-      return fn(err,data)
+      return fn(err, data)
     }
     var unprocessedItems = data.UnprocessedItems[options.destination.tableName]
     if (unprocessedItems !== undefined) {
 
       options.retries++
-        options.counter += (options.data.Items.length - unprocessedItems.length)
+      options.counter += (options.data.Items.length - unprocessedItems.length)
 
       options.data = {
         Items: unprocessedItems

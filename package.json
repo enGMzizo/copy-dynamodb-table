@@ -1,6 +1,6 @@
 {
   "name": "copy-dynamodb-table",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "Copy Dynamodb table to another in the same or different zone , It is 100% safe , and speed depends on your destination table user defined write provisioned throughput",
   "keywords": [
     "dynamodb",
@@ -19,7 +19,7 @@
   "author": "Ezzat @enGMzizo",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.56.0",
+    "aws-sdk": "^2.630.0",
     "readline": "^1.3.0"
   }
 }
