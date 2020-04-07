@@ -2,7 +2,6 @@
 var AWS = require('aws-sdk')
 var validate = require('./validate')
 var readline = require('readline')
-var parallel = require('async').parallel;
 
 function copy(values, fn) {
 
