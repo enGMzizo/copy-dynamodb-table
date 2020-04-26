@@ -24,6 +24,7 @@ copy({
     },
     log: true, // default false
     create : true // create destination table if not exist
+    schemaOnly : false // if true it will copy schema only -- optional
   },
   function (err, result) {
     if (err) {

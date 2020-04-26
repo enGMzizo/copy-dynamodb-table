@@ -36,7 +36,8 @@ function copy(values, fn) {
     retries: 0,
     data: {},
     log: values.log,
-    create: values.create
+    create: values.create,
+    schemaOnly: values.schemaOnly
   }
 
   if (options.source.active && options.destination.active) { // both tables are active
@@ -175,8 +176,14 @@ function waitForActive(options, fn) {
       }
       options.create = false
       options.destination.active = true
+      if (options.schemaOnly) { // schema only copied
+        return fn(err, {
+          count: options.counter,
+          schemaOnly: true,
+          status: 'SUCCESS'
+        })
+      }
       startCopying(options, fn);
-
     })
   }, 1000) // check every second
 }
