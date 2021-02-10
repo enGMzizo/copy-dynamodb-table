@@ -42,7 +42,14 @@ function copy(values, fn) {
   }
 
   if (options.source.active && options.destination.active) { // both tables are active
-    return startCopying(options, fn)
+    return startCopying(options, function (err, data) {
+      if (err) {
+        return fn(err, data)
+      }
+      if (options.continuousBackups) {
+        setContinuousBackups(options, fn)
+      }
+    })
   }
 
   if (options.create) { // create table if not exist
@@ -102,7 +109,7 @@ function setContinuousBackups(options, fn) {
         return fn(err, data);
       }
 
-      var backupStatus = backupData.ContinuousBackupsDescription.ContinuousBackupsStatus;
+      var backupStatus = data.ContinuousBackupsDescription.ContinuousBackupsStatus;
       if (backupStatus === 'ENABLED') {
         enableBackups();
       }
