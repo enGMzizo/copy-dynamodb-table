@@ -23,8 +23,9 @@ copy({
       tableName: 'destination_table_name', // required
     },
     log: true, // default false
-    create : true // create destination table if not exist
-    schemaOnly : false // if true it will copy schema only -- optional
+    create : true, // create destination table if not exist
+    schemaOnly : false, // if true it will copy schema only -- optional
+    continuousBackups: true // if true will enable point in time backups
   },
   function (err, result) {
     if (err) {
@@ -53,7 +54,8 @@ copy({
       tableName: 'destination_table_name', // required
     },
     log: true, // default false
-    create : true // create destination table if not exist
+    create : true, // create destination table if not exist
+    continuousBackups: 'copy' // if 'copy' it will match the point in time backups from the source
   },
   function (err, result) {
     if (err) {
