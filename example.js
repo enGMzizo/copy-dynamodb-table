@@ -19,19 +19,20 @@ var destinationAWSConfig = {
 }
 
 copy({
-    config: globalAWSConfig,
-    source: {
-      tableName: 'source_table_name', // required
-      config: sourceAWSConfig // optional , leave blank to use globalAWSConfig
-    },
-    destination: {
-      tableName: 'destination_table_name', // required
-      config: destinationAWSConfig // optional , leave blank to use globalAWSConfig
-    },
-    log: true, // default false
-    create : false , // create table if not exist
-    schemaOnly: false // make it true and it will copy schema only
+  config: globalAWSConfig,
+  source: {
+    tableName: 'source_table_name', // required
+    config: sourceAWSConfig // optional , leave blank to use globalAWSConfig
   },
+  destination: {
+    tableName: 'destination_table_name', // required
+    config: destinationAWSConfig // optional , leave blank to use globalAWSConfig
+  },
+  log: true, // default false
+  create: false, // create table if not exist
+  schemaOnly: false, // make it true and it will copy schema only
+  continuousBackups: true // default 'copy', true will always enable backups, 'copy' copies the behaviour from the source and false does not enable them
+},
   function (err, result) {
     if (err) {
       console.log(err)

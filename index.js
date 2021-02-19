@@ -38,11 +38,19 @@ function copy(values, fn) {
     transformDataFn: values.transformDataFn,
     log: values.log,
     create: values.create,
-    schemaOnly: values.schemaOnly
+    schemaOnly: values.schemaOnly,
+    continuousBackups: values.continuousBackups
   }
 
   if (options.source.active && options.destination.active) { // both tables are active
-    return startCopying(options, fn)
+    return startCopying(options, function (err, data) {
+      if (err) {
+        return fn(err, data)
+      }
+      if (options.continuousBackups) {
+        setContinuousBackups(options, fn)
+      }
+    })
   }
 
   if (options.create) { // create table if not exist
@@ -66,8 +74,48 @@ function copy(values, fn) {
     if (err) {
       return fn(err, data)
     }
-    startCopying(options, fn)
+
+    startCopying(options, function (err, data) {
+      if (err) {
+        return fn(err, data)
+      }
+      if (options.continuousBackups) {
+        setContinuousBackups(options, fn)
+      }
+    })
   })
+
+}
+
+function setContinuousBackups(options, fn) {
+
+  function enableBackups() {
+    var params = {
+      PointInTimeRecoverySpecification: {
+        PointInTimeRecoveryEnabled: true
+      },
+      TableName: options.destination.tableName
+    };
+
+    options.destination.dynamodb.updateContinuousBackups(params, function (err, data) {
+      return fn(err, data);
+    })
+  }
+
+  if (options.continuousBackups !== 'copy') {
+    enableBackups();
+  } else {
+    options.source.dynamodb.describeContinuousBackups({ TableName: options.source.tableName }, function (err, data) {
+      if (err) {
+        return fn(err, data);
+      }
+
+      var backupStatus = data.ContinuousBackupsDescription.ContinuousBackupsStatus;
+      if (backupStatus === 'ENABLED') {
+        enableBackups();
+      }
+    })
+  }
 
 }
 
