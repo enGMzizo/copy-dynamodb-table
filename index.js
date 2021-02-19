@@ -35,6 +35,7 @@ function copy(values, fn) {
     counter: values.counter || 0,
     retries: 0,
     data: {},
+    transformDataFn: values.transformDataFn,
     log: values.log,
     create: values.create,
     schemaOnly: values.schemaOnly,
@@ -270,7 +271,7 @@ function getItems(options, fn) {
     if (err) {
       return fn(err, data)
     }
-    fn(err, mapItems(data))
+    fn(err, mapItems(options, data))
   })
 }
 
@@ -283,11 +284,11 @@ function scan(options, fn) {
   }, fn)
 }
 
-function mapItems(data) {
+function mapItems(options, data) {
   data.Items = data.Items.map(function (item) {
     return {
       PutRequest: {
-        Item: item
+        Item: !!options.transformDataFn ? options.transformDataFn(item) : item
       }
     }
   })

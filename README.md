@@ -24,8 +24,10 @@ copy({
     },
     log: true, // default false
     create : true, // create destination table if not exist
+    continuousBackups: true, // if true will enable point in time backups
     schemaOnly : false, // if true it will copy schema only -- optional
-    continuousBackups: true // if true will enable point in time backups
+    transformDataFn: function(item){ return item } // function to transform data
+
   },
   function (err, result) {
     if (err) {
