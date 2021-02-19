@@ -117,6 +117,38 @@ copy({
   - If `globalAWSConfig` value is `undefined` the module will extact `AWS` config from environment variables.
   - Increase Write capacity for your dynamodb table temporarily until the copying is finished so you can get the highest copying speed
 
+## Promise version :
+
+Use this if you want to copy using promises, or async / await .
+
+```javascript
+function promiseCopy(data) {
+  return new Promise((resolve, reject) => {
+    copy(data, function (err, result) {
+      if (err) {
+        return reject(err)
+      }
+      resolve(result)
+    })
+  })
+}
+
+promiseCopy({
+  source: {
+    tableName: 'source_table_name', // required
+  },
+  destination: {
+    tableName: 'destination_table_name', // required
+  },
+  log: true, // default false
+  create: true // create destination table if not exist
+}).then(function (results) {
+  // do stuff
+}).catch(function (err) {
+  //handle error
+})
+```
+
 ## Use Case :
   With source table read capacity units = 100 & destination table write capacity units  = 1000 , I managed to copy ~100,000 items from source to destination within ~175 seconds , with avarage item size of 4 KB.
 
@@ -128,6 +160,8 @@ copy({
 - [Floby](https://github.com/Floby)
 - [jermeo](https://github.com/jermeo)
 - [Simon Li](https://github.com/siutsin)
+- [Janusz Slota](https://github.com/nixilla)
+- [Kyle Watson](https://github.com/kylejwatson)
 
 ## License :
 

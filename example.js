@@ -31,7 +31,8 @@ copy({
   log: true, // default false
   create: false, // create table if not exist
   schemaOnly: false, // make it true and it will copy schema only
-  continuousBackups: true // default 'copy', true will always enable backups, 'copy' copies the behaviour from the source and false does not enable them
+  continuousBackups: true, // default 'copy', true will always enable backups, 'copy' copies the behaviour from the source and false does not enable them
+  transformDataFn: function(item){ return item } // function to transform data
 },
   function (err, result) {
     if (err) {
