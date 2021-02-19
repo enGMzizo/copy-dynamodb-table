@@ -25,6 +25,7 @@ copy({
     log: true, // default false
     create : true, // create destination table if not exist
     schemaOnly : false // if true it will copy schema only -- optional
+    transformDataFn: (item) => newItem // function to transform data
   },
   function (err, result) {
     if (err) {
