@@ -55,8 +55,7 @@ copy({
       tableName: 'destination_table_name', // required
     },
     log: true, // default false
-    create : true, // create destination table if not exist
-    continuousBackups: 'copy' // if 'copy' it will match the point in time backups from the source
+    create : true // create destination table if not exist
   },
   function (err, result) {
     if (err) {
