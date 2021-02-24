@@ -44,12 +44,10 @@ function copy(values, fn) {
 
   if (options.source.active && options.destination.active) { // both tables are active
     return startCopying(options, function (err, data) {
-      if (err) {
+      if (err || !options.continuousBackups) {
         return fn(err, data)
       }
-      if (options.continuousBackups) {
-        setContinuousBackups(options, fn)
-      }
+      setContinuousBackups(options, fn)
     })
   }
 
@@ -76,12 +74,10 @@ function copy(values, fn) {
     }
 
     startCopying(options, function (err, data) {
-      if (err) {
+      if (err || !options.continuousBackups) {
         return fn(err, data)
       }
-      if (options.continuousBackups) {
-        setContinuousBackups(options, fn)
-      }
+      setContinuousBackups(options, fn)
     })
   })
 
