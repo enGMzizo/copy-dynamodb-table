@@ -236,7 +236,7 @@ function startCopying(options, fn) {
       if (options.log) {
         readline.clearLine(process.stdout)
         readline.cursorTo(process.stdout, 0)
-        process.stdout.write('Copied ' + options.counter + ' items')
+        process.stdout.write('Copied ' + options.counter + ' items' + ' from ' + options.source.tableName + ' to ' + options.destination.tableName)
       }
 
       if (options.key === undefined) {
